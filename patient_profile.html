@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Profile</title>
+  <link rel="stylesheet" href="css/profile.css">
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+      margin-top: 20px;
+      border-radius: 10px;
+    }
+
+    .btn {
+      margin-top: 15px;
+      padding: 12px 25px;
+      background-color: #573b8a;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .btn:hover {
+      background-color: #432a6c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Patient Profile</h1>
+    <nav class="nav">
+      <a href="#">Profile</a>
+      <a href="#">Appointments</a>
+      <a href="#">Hospital</a>
+      <a href="#">Medical History</a>
+      <a href="#" id="logout-link">Logout</a>
+    </nav>
+
+    <div class="content">
+      <h2>Welcome, <span id="patient-name">[Patient Name]</span></h2>
+      <p><strong>Address:</strong> <span id="patient-address">[Address]</span></p>
+      <p><strong>Contact:</strong> <span id="patient-contact">[Contact]</span></p>
+      <p><strong>Email:</strong> <span id="patient-email">[Email]</span></p>
+      <p><strong>Gender:</strong> <span id="patient-gender">[Gender]</span></p>
+      <p><strong>DOB:</strong> <span id="patient-dob">[DOB]</span></p>
+      <p><strong>City:</strong> <span id="patient-city">[City]</span></p>
+      <p><strong>State:</strong> <span id="patient-state">[State]</span></p>
+
+      <label for="hospital">Select Nearby Hospital:</label>
+      <select id="hospital" class="btn">
+        <option value="St. Luke's Hospital">St. Luke's Hospital</option>
+        <option value="City General Hospital">City General Hospital</option>
+        <option value="Divine Mercy Clinic">Divine Mercy Clinic</option>
+      </select>
+
+      <br><br>
+      <button class="btn" onclick="sendEmergencyRequest()">Request Emergency Help</button>
+      <div id="map"></div>
+    </div>
+  </div>
+
+
+
+
+  
+  <!-- Load patient profile via API -->
+  <script>
+    function loadPatientProfile() {
+      fetch("https://emergency-response-aeh2.onrender.com/api/patient/profile/", {
+        method: "GET",
+        credentials: "include"
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("patient-name").textContent = data.name;
+        document.getElementById("patient-email").textContent = data.email;
+        document.getElementById("patient-gender").textContent = data.gender;
+        document.getElementById("patient-contact").textContent = data.contact;
+        document.getElementById("patient-dob").textContent = data.dob;
+        document.getElementById("patient-address").textContent = data.address;
+        document.getElementById("patient-city").textContent = data.city;
+        document.getElementById("patient-state").textContent = data.state;
+      })
+      .catch(err => {
+        console.error("Error loading patient profile:", err);
+      });
+    }
+  </script>
+
+  <!-- Map + Emergency -->
+  <script>
+    let map;
+    let marker;
+
+    function initMap(lat = 6.5244, lng = 3.3792) {
+      const userLocation = { lat: lat, lng: lng };
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: userLocation,
+        zoom: 14,
+      });
+      marker = new google.maps.Marker({
+        position: userLocation,
+        map: map,
+        title: "You are here",
+      });
+    }
+
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          function (position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            initMap(lat, lng);
+          },
+          function () {
+            alert("Geolocation failed. Please allow location access.");
+          }
+        );
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
+    }
+
+    function sendEmergencyRequest() {
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(position => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const hospital = document.getElementById("hospital").value;
+
+        fetch("https://emergency-response-aeh2.onrender.com/request/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            hospital: hospital,
+            lat: lat,
+            lng: lng
+          })
+        })
+        .then(res => res.json())
+        .then(data => alert(data.message))
+        .catch(err => alert("Error sending request: " + err));
+      }, () => {
+        alert("Failed to get your location");
+      });
+    }
+
+    window.onload = function () {
+      loadPatientProfile();
+      getLocation();
+    };
+  </script>
+
+  <!-- Replace with your Google Maps key -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+
+
+  <script>
+  document.getElementById("logout-link").addEventListener("click", function(e) {
+    e.preventDefault();
+
+    fetch("https://emergency-response-aeh2.onrender.com/logout/", {
+      method: "POST",
+      credentials: "include"
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message);
+      window.location.href = "login.html"; // 🔁 redirect to login page
+    })
+    .catch(err => {
+      alert("Logout failed. Try again.");
+      console.error(err);
+    });
+  });
+</script>
+
+
+</body>
+</html>

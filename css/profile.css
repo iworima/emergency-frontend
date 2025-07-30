@@ -1,0 +1,67 @@
+/* profile.css */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+.profile-container {
+  max-width: 960px;
+  margin: 50px auto;
+  background: #fff;
+  padding: 30px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.profile-header {
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.profile-header h2 {
+  margin: 10px 0;
+  color: #333;
+}
+
+.profile-header p {
+  color: #777;
+}
+
+.profile-details, .profile-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.profile-details div, .profile-options a {
+  flex: 1 1 45%;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+  transition: 0.3s;
+  text-align: center;
+}
+
+.profile-options a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  background-color: #e0e0e0;
+}
+
+.profile-options a:hover {
+  background-color: #d0d0d0;
+  color: #000;
+}
+
+.profile-details div span {
+  display: block;
+  margin-top: 8px;
+  color: #555;
+}
