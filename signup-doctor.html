@@ -11,8 +11,7 @@
     <input type="checkbox" id="chk" aria-hidden="true">
 
     <div class="signup">
-      <!-- doctor signup Form -->
-      <form id="doctor-signup-form" method = "post">
+      <form id="doctor-signup-form">
         <label for="chk" aria-hidden="true">Sign up</label>
         <input type="text" name="name" placeholder="Doctor Name" required>
         <select name="gender" required>
@@ -30,23 +29,34 @@
       </form>
     </div>
 
-
-    <!-- doctor Login Form -->
     <div class="login">
-      <form id="doctor-login-form" method = "post">
+      <form id="doctor-login-form">
         <label for="chk" aria-hidden="true">Login</label>
         <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="pswd" placeholder="Password" required>
+        <input type="password" name="password" placeholder="Password" required>
         <button type="submit">Login</button>
       </form>
     </div>
   </div>
 </body>
 
-
-
 <script>
-  // Doctor Signup Fetch
+  // Fetches CSRF token from the Django backend
+  async function getCsrfToken() {
+    try {
+      const res = await fetch("https://emergency-response-aeh2.onrender.com/api/csrf/");
+      if (!res.ok) {
+        throw new Error('Failed to fetch CSRF token');
+      }
+      const data = await res.json();
+      return data.csrftoken;
+    } catch (error) {
+      console.error("Error fetching CSRF token:", error);
+      return null;
+    }
+  }
+
+  // Doctor Signup Form Submission
   document.getElementById('doctor-signup-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     const form = e.target;
@@ -61,93 +71,64 @@
     };
 
     try {
+      const csrfToken = await getCsrfToken();
+      if (!csrfToken) {
+        alert('Could not get CSRF token. Signup failed.');
+        return;
+      }
+
       const res = await fetch("https://emergency-response-aeh2.onrender.com/api/signup/doctor/", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': getCookie('csrftoken')
+          'X-CSRFToken': csrfToken
         },
         body: JSON.stringify(formData)
       });
       const result = await res.json();
-      alert(result.message || 'Doctor signup successful!');
+      if (res.ok) {
+        alert(result.message || 'Doctor signup successful!');
+      } else {
+        alert('Signup failed: ' + (result.message || res.statusText));
+      }
     } catch (err) {
       alert('Signup failed: ' + err.message);
     }
   });
 
-  // Login Fetch (same file)
+  // Doctor Login Form Submission
   document.getElementById('doctor-login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     const form = e.target;
     const loginData = {
       email: form.email.value,
-      password: form.pswd.value
+      password: form.password.value // Corrected this line
     };
 
     try {
+      const csrfToken = await getCsrfToken();
+      if (!csrfToken) {
+        alert('Could not get CSRF token. Login failed.');
+        return;
+      }
+      
       const res = await fetch("https://emergency-response-aeh2.onrender.com/api/login/", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': getCookie('csrftoken')
+          'X-CSRFToken': csrfToken
         },
         body: JSON.stringify(loginData)
       });
       const result = await res.json();
-      alert(result.message || 'Login successful!');
-      // Redirect based on role if needed
-      // window.location.href = '/doctor-profile.html';
+      if (res.ok) {
+        alert(result.message || 'Login successful!');
+      } else {
+        alert('Login failed: ' + (result.message || res.statusText));
+      }
     } catch (err) {
       alert('Login failed: ' + err.message);
     }
   });
-
-  // CSRF helper
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      for (const cookie of document.cookie.split(';')) {
-        const [key, value] = cookie.trim().split('=');
-        if (key === name) {
-          cookieValue = decodeURIComponent(value);
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
 </script>
-
-
-
-
-
-
-
-  
-<!--conecting HTML forms with javascript
-<script>
-  const signupForm = document.querySelector('.signup form');
-  signupForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const formData = new FormData(signupForm);
-    const data = Object.fromEntries(formData.entries());
-
-    const response = await fetch('/api/signup/doctor/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    const result = await response.json();
-    alert(result.message);
-    if (response.ok) {
-      window.location.href = 'doctor-profile.html'; // simulate redirect
-    }
-  });
-</script>
--->
-
 </html>
