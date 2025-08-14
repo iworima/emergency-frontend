@@ -44,7 +44,9 @@
   // Fetches CSRF token from the Django backend
   async function getCsrfToken() {
     try {
-      const res = await fetch("https://emergency-response-aeh2.onrender.com/api/csrf/");
+      const res = await fetch("https://emergency-response-aeh2.onrender.com/api/csrf/", {
+        credentials: 'include'
+      });
       if (!res.ok) {
         throw new Error('Failed to fetch CSRF token');
       }
@@ -83,7 +85,8 @@
           'Content-Type': 'application/json',
           'X-CSRFToken': csrfToken
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
+        credentials: 'include'
       });
       const result = await res.json();
       if (res.ok) {
@@ -119,6 +122,7 @@
           'X-CSRFToken': csrfToken
         },
         body: JSON.stringify(loginData)
+        credentials: 'include'
       });
       const result = await res.json();
       if (res.ok) {

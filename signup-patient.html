@@ -50,10 +50,13 @@
 <script>
 // fetch csrf token from Django-served endpoint(from backend)
 async function getCsrfToken() {
-    const res = await fetch("https://emergency-response-aeh2.onrender.com/api/csrf/");
+    const res = await fetch("https://emergency-response-aeh2.onrender.com/api/csrf/", {
+        credentials: 'include' // <-- Add this
+    });
     const data = await res.json();
     return data.csrftoken;
 }
+
 
 // Patient Signup Fetch
 document.getElementById('patient-signup-form').addEventListener('submit', async function(e) {
@@ -81,7 +84,9 @@ document.getElementById('patient-signup-form').addEventListener('submit', async 
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken // Use the fetched token here
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify(formData),
+            credentials: 'include' // <-- Add this to all POST requests
+
         });
 
         const result = await response.json();
@@ -111,7 +116,8 @@ document.getElementById('patient-login-form').addEventListener('submit', async f
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken // Use the fetched token here
             },
-            body: JSON.stringify(loginData)
+            body: JSON.stringify(loginData),
+            credentials: 'include'
         });
         const result = await res.json();
         alert(result.message || 'Login successful!');
